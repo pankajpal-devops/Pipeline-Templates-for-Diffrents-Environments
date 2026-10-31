@@ -1,0 +1,81 @@
+pool: Station-testing-pool
+
+stages:
+  - stage: validate
+    displayName: validate ka stage
+    jobs:
+      - job: validate
+        displayName: validate ki job
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+            backendServiceArm: 'Station-ASC'
+            backendAzureRmResourceGroupName: 'time-rg'
+            backendAzureRmStorageAccountName: 'timesa1'
+            backendAzureRmContainerName: 'tfstate'
+            backendAzureRmKey: 'prood-state'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'validate'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+            
+  - stage: plan
+    displayName: plan stage
+    jobs:
+      - job: plan
+        displayName: plan ki job
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+            backendServiceArm: 'Station-ASC'
+            backendAzureRmResourceGroupName: 'time-rg'
+            backendAzureRmStorageAccountName: 'timesa1'
+            backendAzureRmContainerName: 'tfstate'
+            backendAzureRmKey: 'prood-state'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+            environmentServiceNameAzureRM: 'Station-ASC'
+
+  - stage: approval
+    displayName: approval ki stage
+    jobs:
+    - job: approval
+      displayName: approval ki stage
+      pool: server
+      steps:
+      - task: ManualValidation@1
+        inputs:
+          notifyUsers: 'abd@gmail.com'
+
+  - stage: apply
+    displayName: apply ki stage
+    jobs:
+      - job: apply
+        displayName: apply ki job
+        steps:
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+            backendServiceArm: 'Station-ASC'
+            backendAzureRmResourceGroupName: 'time-rg'
+            backendAzureRmStorageAccountName: 'timesa1'
+            backendAzureRmContainerName: 'tfstate'
+            backendAzureRmKey: 'prood-state'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+            environmentServiceNameAzureRM: 'Station-ASC'
